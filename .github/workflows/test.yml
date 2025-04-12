@@ -38,7 +38,11 @@ jobs:
                 - "**.json"
 
       - name: Verify formatted include paths
-        run: exit ${{ env.PATHS != '["**.json","**.md","**.sublime-project","**.ya?ml"]' && 1 || 0 }}
+        run: |
+          echo paths=${{ env.PATHS }}
+          exit ${{ env.PATHS != '["**.json","**.md","**.sublime-project","**.ya?ml"]' && 1 || 0 }}
 
       - name: Verify formatted exclude paths
-        run: exit ${{ env.PATHS_IGNORE }} != '[".gitignore","LICENSE"]' && 1 || 0 }}
+        run: |
+          echo ignored_paths=${{env.PATHS_IGNORE}}
+          exit ${{ env.PATHS_IGNORE }} != '[".gitignore","LICENSE"]' && 1 || 0 }}
