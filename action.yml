@@ -58,26 +58,26 @@ runs:
 
     - name: Set formatted paths in env
       run: |
-        echo "PATHS='$(echo "$(cat <<EOF
+        echo "PATHS=$(echo "$(cat <<EOF
         ${{ inputs.paths || '[]' }}
         EOF
-        )" | yq -o=json -I=0)'" >> $GITHUB_ENV
+        )" | yq -o=json -I=0)" >> $GITHUB_ENV
       shell: bash
 
     - name: Set formatted paths_ignore in env
       run: |
-        echo "PATHS_IGNORE='$(echo "$(cat <<EOF
+        echo "PATHS_IGNORE=$(echo "$(cat <<EOF
         ${{ inputs.paths_ignore || '[]' }}
         EOF
-        )" | yq -o=json -I=0)'" >> $GITHUB_ENV
+        )" | yq -o=json -I=0)" >> $GITHUB_ENV
       shell: bash
 
     - name: Set formatted paths_named in env
       run: |
-        echo "PATHS_NAMED='$(echo "$(cat <<EOF
+        echo "PATHS_NAMED=$(echo "$(cat <<EOF
         ${{ inputs.paths_named || '{}' }}
         EOF
-        )" | yq '.. style="flow"')'" >> $GITHUB_ENV
+        )" | yq '.. style="flow"')" >> $GITHUB_ENV
       shell: bash
 
     - name: Evaluate conditions
