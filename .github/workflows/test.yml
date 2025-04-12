@@ -45,4 +45,4 @@ jobs:
       - name: Verify formatted exclude paths
         run: |
           echo ignored_paths=${{env.PATHS_IGNORE}}
-          exit ${{ env.PATHS_IGNORE }} != '[".gitignore","LICENSE"]' && 1 || 0 }}
+          exit ${{ env.PATHS_IGNORE != '[".gitignore","LICENSE"]' }}  && 1 || 0 }}
