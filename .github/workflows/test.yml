@@ -25,17 +25,17 @@ jobs:
         with:
           token: ${{ github.token }}
           paths: |
-            - **.json
-            - **.md
-            - **.sublime-project
-            - **.ya?ml
+            - "**.json"
+            - "**.md"
+            - "**.sublime-project"
+            - "**.ya?ml"
           paths_ignore: |
             - .gitignore
             - LICENSE
           paths_named: |
             foo:
               paths:
-                - **.json
+                - "**.json"
 
       - name: Verify formatted include paths
         run: exit ${{ env.PATHS != '["**.json","**.md","**.sublime-project","**.ya?ml"]' && 1 || 0 }}
