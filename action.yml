@@ -4,6 +4,9 @@ description: >-
   Path formats: https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
 
 inputs:
+  token:
+    description: ""
+    required: true
   checkout:
     description: >-
       Whether to check out the repository.
@@ -71,3 +74,4 @@ runs:
         paths_filter: ${{ env.PATHS_NAMED }}
         skip_after_successful_duplicate: true
         skip_summary: true
+        github_token: ${{ github.token}}

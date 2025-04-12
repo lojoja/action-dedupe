@@ -12,6 +12,10 @@ jobs:
   test-paths:
     name: Test paths
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+
     steps:
       - name: Check out repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -19,6 +23,7 @@ jobs:
       - name: Run dedupe
         uses: ./
         with:
+          token: ${{ github.token }}
           paths: |
             - **.json
             - **.md
