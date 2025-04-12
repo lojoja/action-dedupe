@@ -20,13 +20,13 @@ jobs:
         uses: ./
         with:
           paths: |
-            **.json
-            **.md
-            **.sublime-project
-            **.ya?ml
+            - **.json
+            - **.md
+            - **.sublime-project
+            - **.ya?ml
           paths_ignore: |
-            .gitignore
-            LICENSE
+            - .gitignore
+            - LICENSE
           paths_named: |
             foo:
               paths:
