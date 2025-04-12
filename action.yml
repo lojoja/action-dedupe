@@ -1,0 +1,73 @@
+name: Dedupe
+description: >-
+  Determine whether workflows/jobs/steps can be skipped based on the modified files.
+  Path formats: https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
+
+inputs:
+  checkout:
+    description: >-
+      Whether to check out the repository.
+      Set to "false" if the repository is checked out prior to this action being called.
+      Optional. Default: "true".
+    required: false
+    default: "true"
+  ignore:
+    description: >-
+      Whether to ignore the determination.
+      Used to conditionally force something to run even if it's skippable.
+      Optional. Default: "false"
+    required: false
+    default: "false"
+  paths:
+    description: >-
+      A YAML sequence of paths to include in the determination.
+      Optional. Default: "".
+    required: false
+    default: ""
+  paths_ignore:
+    description: >-
+      A YAML sequence of paths to exclude from the determination
+      Optional. Default: "".
+    required: false
+    default: ""
+  paths_named:
+    description: >-
+      A YAML mapping with named `paths`/`paths_ignore` conditions.
+      Used to determine skippability for e.g., multiple jobs/steps in a workflow.
+      Optional. Default: "".
+    required: false
+    default: ""
+
+outputs:
+  skip:
+    description: Whether the run should be skipped.
+    value: ${{ steps.evaluate.outputs.should_skip }}
+  skip_named:
+    description: Whether each named condition run should be skipped.
+    value: ${{ steps.named.outputs.should_skip }}
+
+runs:
+  using: composite
+  steps:
+    - name: Check out repository
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      if: ${{ fromJSON(inputs.checkout) }}
+
+    - name: Set formatted paths in env
+      run: |
+        echo "PATHS="$(echo "${{ inputs.paths || '[]' }}" | yq -o=json -I=0)"" >> $GITHUB_ENV
+        echo "PATHS_IGNORE="$(echo "${{ inputs.paths_ignore || '[]' }}" | yq -o=json -I=0)"" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Evaluate conditions
+      id: evaluate
+      uses: fkirc/skip-duplicate-actions@f75f66ce1886f00957d99748a42c724f4330bdcf
+      if: ${{ ! fromJSON(inputs.ignore) }}
+      with:
+        cancel_others: true
+        concurrent_skipping: "never"
+        paths: ${{ env.PATHS }}
+        paths_ignore: ${{ env.PATHS_IGNORE }}
+        paths_filter: ${{ env.PATHS_NAMED }}
+        skip_after_successful_duplicate: true
+        skip_summary: true

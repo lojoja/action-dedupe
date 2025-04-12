@@ -1,0 +1,39 @@
+name: Test
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    branches: [dev, main]
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  test-paths:
+    name: Test paths
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Run dedupe
+        uses: ./
+        with:
+          paths: |
+            **.json
+            **.md
+            **.sublime-project
+            **.ya?ml
+          paths_ignore: |
+            .gitignore
+            LICENSE
+          paths_named: |
+            foo:
+              paths:
+                - **.json
+
+      - name: Verify formatted include paths
+        run: exit ${{ env.PATHS != '["**.json","**.md","**.sublime-project","**.ya?ml"]' && 1 || 0 }}
+
+      - name: Verify formatted exclude paths
+        run: exit ${{ env.PATHS_IGNORE }} != '[".gitignore","LICENSE"]' && 1 || 0 }}
