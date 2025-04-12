@@ -74,8 +74,8 @@ runs:
 
     - name: Set formatted paths_named in env
       run: |
-        echo "PATHS='$(echo "$(cat <<EOF
-        ${{ inputs.paths || '{}' }}
+        echo "PATHS_NAMED='$(echo "$(cat <<EOF
+        ${{ inputs.paths_named || '{}' }}
         EOF
         )" | yq '.. style="flow"')'" >> $GITHUB_ENV
       shell: bash
