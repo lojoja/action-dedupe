@@ -67,7 +67,7 @@ runs:
     - name: Set formatted paths_ignore in env
       run: |
         echo "PATHS_IGNORE='$(echo "$(cat <<EOF
-          ${{ inputs.paths_ignore || '[]' }}
+        ${{ inputs.paths_ignore || '[]' }}
         EOF
         )" | yq -o=json -I=0)'" >> $GITHUB_ENV
       shell: bash
@@ -75,7 +75,7 @@ runs:
     - name: Set formatted paths_named in env
       run: |
         echo "PATHS='$(echo "$(cat <<EOF
-          ${{ inputs.paths || '{}' }}
+        ${{ inputs.paths || '{}' }}
         EOF
         )" | yq '.. style="flow"')'" >> $GITHUB_ENV
       shell: bash
