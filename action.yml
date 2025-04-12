@@ -55,8 +55,8 @@ runs:
 
     - name: Set formatted paths in env
       run: |
-        echo "PATHS="$(echo "${{ inputs.paths || '[]' }}" | yq -o=json -I=0)"" >> $GITHUB_ENV
-        echo "PATHS_IGNORE="$(echo "${{ inputs.paths_ignore || '[]' }}" | yq -o=json -I=0)"" >> $GITHUB_ENV
+        echo "PATHS="$(echo '[${{ inputs.paths || '' }}]' | yq -o=json -I=0)"" >> $GITHUB_ENV
+        echo "PATHS_IGNORE="$(echo "[${{ inputs.paths_ignore || '' }}]" | yq -o=json -I=0)"" >> $GITHUB_ENV
       shell: bash
 
     - name: Evaluate conditions
