@@ -23,7 +23,7 @@ jobs:
       - name: Run dedupe
         uses: ./
         with:
-          token: ${{ github.token }}
+          github_token: ${{ github.token }}
           paths: |
             - "**.json"
             - "**.md"
