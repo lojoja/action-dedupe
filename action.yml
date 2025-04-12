@@ -4,8 +4,8 @@ description: >-
   Path formats: https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
 
 inputs:
-  token:
-    description: ""
+  github_token:
+    description: The Github authentication token.
     required: true
   checkout:
     description: >-
@@ -57,9 +57,15 @@ runs:
       if: ${{ fromJSON(inputs.checkout) }}
 
     - name: Set formatted paths in env
-      run: |
-        echo "PATHS="$(echo '[${{ inputs.paths || '' }}]' | yq -o=json -I=0)"" >> $GITHUB_ENV
-        echo "PATHS_IGNORE="$(echo "[${{ inputs.paths_ignore || '' }}]" | yq -o=json -I=0)"" >> $GITHUB_ENV
+      run: echo "PATHS="'$(echo ${{ inputs.paths || '[]' }} | yq -o=json -I=0)'"" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Set formatted paths_ignore in env
+      run: echo "PATHS_IGNORE="'$(echo ${{ inputs.paths_ignore || '[]' }} | yq -o=json -I=0)'"" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Set formatted paths_named in env
+      run: echo "PATHS_NAMED="'$(echo ${{ inputs.paths_named || '{}' }} | yq '.. style="flow"')'"" >> $GITHUB_ENV
       shell: bash
 
     - name: Evaluate conditions
@@ -74,4 +80,4 @@ runs:
         paths_filter: ${{ env.PATHS_NAMED }}
         skip_after_successful_duplicate: true
         skip_summary: true
-        github_token: ${{ github.token}}
+        github_token: ${{ inputs.github_token }}
