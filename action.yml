@@ -57,15 +57,15 @@ runs:
       if: ${{ fromJSON(inputs.checkout) }}
 
     - name: Set formatted paths in env
-      run: echo "PATHS="'$(echo ${{ inputs.paths || '[]' }} | yq -o=json -I=0)'"" >> $GITHUB_ENV
+      run: echo "PATHS="'$(echo "${{ inputs.paths || '[]' }}" | yq -o=json -I=0)'"" >> $GITHUB_ENV
       shell: bash
 
     - name: Set formatted paths_ignore in env
-      run: echo "PATHS_IGNORE="'$(echo ${{ inputs.paths_ignore || '[]' }} | yq -o=json -I=0)'"" >> $GITHUB_ENV
+      run: echo "PATHS_IGNORE="'$(echo "${{ inputs.paths_ignore || '[]' }}" | yq -o=json -I=0)'"" >> $GITHUB_ENV
       shell: bash
 
     - name: Set formatted paths_named in env
-      run: echo "PATHS_NAMED="'$(echo ${{ inputs.paths_named || '{}' }} | yq '.. style="flow"')'"" >> $GITHUB_ENV
+      run: echo "PATHS_NAMED="'$(echo "${{ inputs.paths_named || '{}' }}" | yq '.. style="flow"')'"" >> $GITHUB_ENV
       shell: bash
 
     - name: Evaluate conditions
