@@ -50,4 +50,4 @@ jobs:
       - name: Verify formatted named paths
         run: |
           echo ignored_paths=${{env.PATHS_NAMED}}
-          exit ${{ env.PATHS_NAMED != '{"foo": {"paths": [''**.json'']}}' && 1 || 0 }}
+          exit ${{ env.PATHS_NAMED != '{foo: {paths: [''**.json'']}}' && 1 || 0 }}
