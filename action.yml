@@ -44,10 +44,10 @@ inputs:
 outputs:
   skip:
     description: Whether the run should be skipped.
-    value: ${{ steps.evaluate.outputs.should_skip }}
+    value: ${{ inputs.ignore != 'false' && 'true' || steps.evaluate.outputs.should_skip }}
   skip_named:
     description: Whether each named condition run should be skipped.
-    value: ${{ steps.named.outputs.should_skip }}
+    value: ${{ inputs.ignore == 'true' && '{}' || steps.evaluate.outputs.paths_result }}
 
 runs:
   using: composite
@@ -56,40 +56,43 @@ runs:
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       if: ${{ inputs.checkout == 'true' }}
 
-    - name: Set formatted paths in env
+    - name: Set paths in env
       run: |
         echo "PATHS=$(echo "$(cat <<EOF
         ${{ inputs.paths || '[]' }}
         EOF
         )" | yq -o=json -I=0)" >> $GITHUB_ENV
       shell: bash
+      if: ${{ inputs.ignore == 'false' }}
 
-    - name: Set formatted paths_ignore in env
+    - name: Set paths_ignore in env
       run: |
         echo "PATHS_IGNORE=$(echo "$(cat <<EOF
         ${{ inputs.paths_ignore || '[]' }}
         EOF
         )" | yq -o=json -I=0)" >> $GITHUB_ENV
       shell: bash
+      if: ${{ inputs.ignore == 'false' }}
 
-    - name: Set formatted paths_named in env
+    - name: Set paths_named in env
       run: |
         echo "PATHS_NAMED=$(echo "$(cat <<EOF
         ${{ inputs.paths_named || '{}' }}
         EOF
         )" | yq '.. style="flow"')" >> $GITHUB_ENV
       shell: bash
+      if: ${{ inputs.ignore == 'false' }}
 
     - name: Evaluate conditions
       id: evaluate
       uses: fkirc/skip-duplicate-actions@04a1aebece824b56e6ad6a401d015479cd1c50b3
-      if: ${{ inputs.ignore != 'false' }}
+      if: ${{ inputs.ignore == 'false' }}
       with:
         cancel_others: true
         concurrent_skipping: "never"
+        github_token: ${{ inputs.github_token }}
         paths: ${{ env.PATHS }}
         paths_ignore: ${{ env.PATHS_IGNORE }}
         paths_filter: ${{ env.PATHS_NAMED }}
         skip_after_successful_duplicate: true
         skip_summary: true
-        github_token: ${{ inputs.github_token }}
