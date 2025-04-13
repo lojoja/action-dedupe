@@ -54,7 +54,7 @@ runs:
   steps:
     - name: Check out repository
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-      if: ${{ inputs.checkout != false }}
+      if: ${{ inputs.checkout == 'true' }}
 
     - name: Set formatted paths in env
       run: |
