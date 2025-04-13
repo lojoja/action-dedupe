@@ -24,6 +24,8 @@ jobs:
         uses: ./
         with:
           github_token: ${{ github.token }}
+          checkout: false
+          #ignore: true
           paths: |
             - "**.json"
             - "**.md"
@@ -37,17 +39,14 @@ jobs:
               paths:
                 - "**.json"
 
-      - name: Verify formatted include paths
+      - name: Verify include paths
         run: |
-          echo paths=${{ env.PATHS }}
           exit ${{ env.PATHS != '["**.json","**.md","**.sublime-project","**.ya?ml"]' && 1 || 0 }}
 
-      - name: Verify formatted exclude paths
+      - name: Verify exclude paths
         run: |
-          echo ignored_paths=${{env.PATHS_IGNORE}}
           exit ${{ env.PATHS_IGNORE != '[".gitignore","LICENSE"]' && 1 || 0 }}
 
-      - name: Verify formatted named paths
+      - name: Verify named paths
         run: |
-          echo ignored_paths=${{env.PATHS_NAMED}}
           exit ${{ env.PATHS_NAMED != '{foo: {paths: [''**.json'']}}' && 1 || 0 }}
