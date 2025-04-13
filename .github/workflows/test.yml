@@ -24,8 +24,8 @@ jobs:
         uses: ./
         with:
           github_token: ${{ github.token }}
-          checkout: false
-          #ignore: true
+          checkout: "false"
+          ignore: "true"
           paths: |
             - "**.json"
             - "**.md"
