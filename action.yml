@@ -54,7 +54,7 @@ runs:
   steps:
     - name: Check out repository
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-      if: ${{ fromJSON(inputs.checkout) }}
+      if: ${{ inputs.checkout != false }}
 
     - name: Set formatted paths in env
       run: |
@@ -83,7 +83,7 @@ runs:
     - name: Evaluate conditions
       id: evaluate
       uses: fkirc/skip-duplicate-actions@04a1aebece824b56e6ad6a401d015479cd1c50b3
-      if: ${{ ! fromJSON(inputs.ignore) }}
+      if: ${{ inputs.ignore != 'false' }}
       with:
         cancel_others: true
         concurrent_skipping: "never"
