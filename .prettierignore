@@ -1,5 +1,6 @@
 *.sublime-workspace
 ._*
 .DS_Store
+.pnpm-store
 node_modules/
 pnpm-lock.yaml
