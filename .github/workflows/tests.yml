@@ -1,0 +1,83 @@
+name: Tests
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    branches: [dev, main]
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  changes:
+    name: Identify changes
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.dedupe.outputs.should_skip }}
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Dedupe
+        id: dedupe
+        uses: ./
+        with:
+          github_token: ${{ github.token }}
+          paths: |
+            - .github/workflows/tests.yml
+            - action.yml
+
+  test-dedupe-paths:
+    name: Test dedupe paths
+    runs-on: ubuntu-latest
+    needs: changes
+    permissions:
+      actions: read
+      contents: write
+    if: needs.changes.outputs.should_skip == 'false'
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Run dedupe action
+        uses: ./
+        with:
+          github_token: ${{ github.token }}
+          paths: |
+            - "**.json"
+            - "**.ya?ml"
+          paths_ignore: |
+            - .gitignore
+            - LICENSE
+          paths_named: |
+            foo:
+              paths:
+                - "**.json"
+
+      - name: Verify include paths
+        run: |
+          exit ${{ env.PATHS != '["**.json","**.ya?ml"]' && 1 || 0 }}
+
+      - name: Verify exclude paths
+        run: |
+          exit ${{ env.PATHS_IGNORE != '[".gitignore","LICENSE"]' && 1 || 0 }}
+
+      - name: Verify named paths
+        run: |
+          exit ${{ env.PATHS_NAMED != '{foo: {paths: [''**.json'']}}' && 1 || 0 }}
+
+  result:
+    name: Tests result
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - test-dedupe-paths
+    steps:
+      - name: Tests failed
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
+      - name: Tests passed
+        run: exit 0
