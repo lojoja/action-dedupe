@@ -1,0 +1,60 @@
+name: Format
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    branches: [dev, main]
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  changes:
+    name: Identify changes
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.dedupe.outputs.should_skip }}
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Dedupe
+        id: dedupe
+        uses: ./
+        with:
+          github_token: ${{ github.token }}
+          paths_ignore: |
+            - .actrc
+            - .gitignore
+            - LICENSE
+            - pnpm-lock.yaml
+
+  prettier:
+    name: Prettier
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.should_skip == 'false'
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Run prettier
+        uses: lojoja/action-prettier@main
+        with:
+          node_version: 22
+
+  result:
+    name: Format result
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - prettier
+    steps:
+      - name: Format failed
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
+      - name: Format passed
+        run: exit 0
