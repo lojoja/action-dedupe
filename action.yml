@@ -1,87 +1,64 @@
 name: Dedupe
-description: >-
-  Determine whether workflows/jobs/steps can be skipped based on the modified files.
-  Path formats: https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
+description: Determine whether workflows/jobs/steps can be skipped based on the modified files.
 
 inputs:
   github_token:
     description: The Github authentication token.
     required: true
-  checkout:
-    description: >-
-      Whether to check out the repository.
-      Set to "false" if the repository is checked out prior to this action being called.
-      Optional. Default: "true".
-    required: false
-    default: "true"
   ignore:
-    description: >-
-      Whether to ignore the determination.
-      Used to conditionally force something to run even if it's skippable.
-      Optional. Default: "false"
+    description: Whether to ignore the determination. Used to conditionally force something to run even if it's skippable.
     required: false
     default: "false"
   paths:
-    description: >-
-      A YAML sequence of paths to include in the determination.
-      Optional. Default: "".
+    description: A YAML sequence of paths to include in the determination.
     required: false
     default: ""
   paths_ignore:
-    description: >-
-      A YAML sequence of paths to exclude from the determination
-      Optional. Default: "".
+    description: A YAML sequence of paths to exclude from the determination
     required: false
     default: ""
   paths_named:
-    description: >-
-      A YAML mapping with named `paths`/`paths_ignore` conditions.
-      Used to determine skippability for e.g., multiple jobs/steps in a workflow.
-      Optional. Default: "".
+    description: A YAML mapping with named `paths`/`paths_ignore` conditions. Used to determine skippability for e.g., multiple jobs/steps in a workflow.
     required: false
     default: ""
 
 outputs:
-  skip:
+  should_skip:
     description: Whether the run should be skipped.
     value: ${{ inputs.ignore != 'false' && 'true' || steps.evaluate.outputs.should_skip }}
-  skip_named:
+  named:
     description: Whether each named condition run should be skipped.
     value: ${{ inputs.ignore == 'true' && '{}' || steps.evaluate.outputs.paths_result }}
 
 runs:
   using: composite
   steps:
-    - name: Check out repository
-      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-      if: ${{ inputs.checkout == 'true' }}
-
     - name: Set paths in env
+      if: ${{ inputs.ignore == 'false' }}
       run: |
         echo "PATHS=$(echo "$(cat <<EOF
         ${{ inputs.paths || '[]' }}
         EOF
         )" | yq -o=json -I=0)" >> $GITHUB_ENV
       shell: bash
-      if: ${{ inputs.ignore == 'false' }}
 
     - name: Set paths_ignore in env
+      if: ${{ inputs.ignore == 'false' }}
       run: |
         echo "PATHS_IGNORE=$(echo "$(cat <<EOF
         ${{ inputs.paths_ignore || '[]' }}
         EOF
         )" | yq -o=json -I=0)" >> $GITHUB_ENV
       shell: bash
-      if: ${{ inputs.ignore == 'false' }}
 
     - name: Set paths_named in env
+      if: ${{ inputs.ignore == 'false' }}
       run: |
         echo "PATHS_NAMED=$(echo "$(cat <<EOF
         ${{ inputs.paths_named || '{}' }}
         EOF
         )" | yq '.. style="flow"')" >> $GITHUB_ENV
       shell: bash
-      if: ${{ inputs.ignore == 'false' }}
 
     - name: Evaluate conditions
       id: evaluate
@@ -89,7 +66,7 @@ runs:
       if: ${{ inputs.ignore == 'false' }}
       with:
         cancel_others: true
-        concurrent_skipping: "never"
+        concurrent_skipping: never
         github_token: ${{ inputs.github_token }}
         paths: ${{ env.PATHS }}
         paths_ignore: ${{ env.PATHS_IGNORE }}
