@@ -31,7 +31,6 @@ jobs:
           github_token: ${{ github.token }}
           paths_ignore: |
             - .actrc
-            - .gitignore
             - LICENSE
             - pnpm-lock.yaml
 
