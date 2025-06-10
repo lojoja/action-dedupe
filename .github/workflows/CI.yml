@@ -1,22 +1,23 @@
-name: Tests
+name: CI
 
 on:
   push:
-    branches: [dev, main]
   pull_request:
-    branches: [dev, main]
   workflow_call:
   workflow_dispatch:
 
+env:
+  NODE_VERSION: "22"
+  PYTHON_PACKAGE_MANAGER: poetry
+  PYTHON_VERSION: "3.13"
+
 jobs:
   changes:
-    name: Identify changes
+    name: Changes
     runs-on: ubuntu-latest
     outputs:
       should_skip: ${{ steps.dedupe.outputs.should_skip }}
-    permissions:
-      actions: read
-      contents: write
+      named: ${{ steps.dedupe.outputs.named }}
     steps:
       - name: Check out repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -27,17 +28,40 @@ jobs:
         with:
           github_token: ${{ github.token }}
           paths: |
-            - .github/workflows/tests.yml
-            - action.yml
+            - .github/workflows/CI.yml
+          paths_named: |
+            prettier:
+              paths_ignore:
+                - .actrc
+                - LICENSE
+                - pnpm-lock.yaml
+            tests:
+              paths:
+                - .github/workflows/tests.yml
+                - action.yml
+
+  prettier:
+    name: Prettier
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.should_skip == 'false' || ! fromJSON(needs.changes.outputs.named).prettier.should_skip
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Run prettier
+        uses: lojoja/action-prettier@main
+        with:
+          node_version: ${{ env.NODE_VERSION }}
 
   test-dedupe-paths:
     name: Test dedupe paths
     runs-on: ubuntu-latest
     needs: changes
+    if: needs.changes.outputs.should_skip == 'false' || ! fromJSON(needs.changes.outputs.named).tests.should_skip
     permissions:
       actions: read
       contents: write
-    if: needs.changes.outputs.should_skip == 'false'
     steps:
       - name: Check out repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -69,15 +93,16 @@ jobs:
         run: |
           exit ${{ env.PATHS_NAMED != '{foo: {paths: [''**.json'']}}' && 1 || 0 }}
 
-  result:
-    name: Tests result
+  ci-result:
+    name: CI Result
     runs-on: ubuntu-latest
     if: always()
     needs:
+      - prettier
       - test-dedupe-paths
     steps:
-      - name: Tests failed
+      - name: CI failed
         if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
         run: exit 1
-      - name: Tests passed
+      - name: CI passed
         run: exit 0
