@@ -8,8 +8,6 @@ on:
 
 env:
   NODE_VERSION: "22"
-  PYTHON_PACKAGE_MANAGER: poetry
-  PYTHON_VERSION: "3.13"
 
 jobs:
   changes:
