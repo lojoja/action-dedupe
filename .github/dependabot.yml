@@ -17,7 +17,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      node-production-dependencies:
-        dependency-type: production
-      node-development-dependencies:
+      dev:
         dependency-type: development
+      prod:
+        dependency-type: production
