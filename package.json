@@ -5,7 +5,7 @@
     "node": ">=22"
   },
   "devDependencies": {
-    "prettier": "^3.9.4"
+    "prettier": "^3.9.5"
   },
   "scripts": {
     "format": "prettier -w .",
