@@ -62,7 +62,7 @@ runs:
 
     - name: Evaluate conditions
       id: evaluate
-      uses: fkirc/skip-duplicate-actions@04a1aebece824b56e6ad6a401d015479cd1c50b3
+      uses: fkirc/skip-duplicate-actions@b974a9395958c231af965b70070979a577efa578
       if: ${{ inputs.ignore == 'false' }}
       with:
         cancel_others: true
